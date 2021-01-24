@@ -25,7 +25,9 @@ class ANSI:
 
 
 # help text
-helpText = "Dice rolls are in the usual format:\n[number of dice]d[sides on dice]\n\nThe highest and lowest dice can be removed by adding 't' or 'b' to the end, respectively, along with the amount to be removed:\n#d#t[number of dice to be removed from top]\n#d#b[number of dice to be removed from bottom]\n\nMultiple dice can be rolled at the same time:\n#d# #d#\n\nBasic math is also supported\n\nSome common operations have shortcuts\n1d20: T\nAdvantage (2d20b1): A\nDisadvantage (2d20t1): D\nStats Rolling (4d6b1): S\n\nEverything is case insensitive\n\nType 'exit' to quit"
+helpText = ""
+with open("InfoText.txt", "r") as filehandle:
+    helpText = filehandle.read()
 
 # set default roll
 pRoll = "1d20"
