@@ -5,11 +5,14 @@ import re
 
 # TODO:
 # add parenthesis support
-# handle arrow keys
-# add previous answer (ans) functionality
+# print math better
+# handle arrow keys (probably not going to happen)
 # add more shortcuts as needed
+# add more math (√, min/max, trigonometric). I don't acutally know why I would ever use this but here we are
 
 # define ANSI colors
+
+
 class ANSI:
     RED = '\033[91m'
     BLUE = '\033[94m'
@@ -22,6 +25,7 @@ class ANSI:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
     END = '\033[0m'
+    CLEAR = '\033[2J\033[0;0H'
 
 
 # help text
@@ -31,6 +35,7 @@ with open("InfoText.txt", "r") as filehandle:
 
 # set default roll
 pRoll = "1d20"
+pAns = 0
 
 # compile regexes
 diceRegex = re.compile(r"^(\d+d\d+((t|b)\d+)?(?=( |$)))+")
@@ -38,9 +43,10 @@ intRegex = re.compile(r"^\d+$")
 floatRegex = re.compile(r"^\d*\.\d+$")
 multRegex = re.compile(r"[\*/%]")
 addRegex = re.compile(r"[\+-]")
+mooRegex = re.compile(r"^mo{2,}$")
 
 
-def parseInput(input):
+def parseString(input):
     input = input.strip()
 
     # do math if there are any math symbols
@@ -64,15 +70,18 @@ def parseInput(input):
     if input == "":
         return 0
 
+    if input == "ans":
+        return pAns
+
     # handle shortcuts
     if input == "t":
-        return rolldice("1d20")
+        return rollDie("1d20")
     if input == "a":
-        return rollDice("2d20b1")
+        return rollDie("2d20b1")
     if input == "d":
-        return rollDice("2d20t1")
+        return rollDie("2d20t1")
     if input == "s":
-        return rollDice("4d6b1")
+        return rollDie("4d6b1")
 
     raise ValueError("Invalid Input")
 
@@ -83,13 +92,13 @@ def math(input):
 
     if "^" in input:
         parts = input.split("^", 2)
-        return parseInput(parts[0]) ** parseInput(parts[1])
+        return parseString(parts[0]) ** parseString(parts[1])
 
     if "*" in input or "/" in input or "%" in input:
         delimiter = multRegex.search(input).group(0)
         parts = input.split(delimiter, 2)
-        r1 = parseInput(parts[0])
-        r2 = parseInput(parts[1])
+        r1 = parseString(parts[0])
+        r2 = parseString(parts[1])
         if delimiter == "*":
             return r1 * r2
         if delimiter == "/":
@@ -100,8 +109,8 @@ def math(input):
     if "+" in input or "-" in input:
         delimiter = addRegex.search(input).group(0)
         parts = input.split(delimiter, 2)
-        r1 = parseInput(parts[0])
-        r2 = parseInput(parts[1])
+        r1 = parseString(parts[0])
+        r2 = parseString(parts[1])
         if delimiter == "+":
             return r1 + r2
         if delimiter == "-":
@@ -132,7 +141,7 @@ def rollDie(input):
         print(roll, end=" ", flush=True)
         sum += roll
 
-    print("\n" + ANSI.BOLD + str(sum) + ANSI.END + "\n")
+    print("\n", ANSI.BOLD, str(sum), ANSI.END, "\n", sep="")
 
     return sum
 
@@ -165,12 +174,12 @@ def removeDice(num, dice, remove, top):
     for roll in rolls:
         n = roll["roll"]
         if roll["removed"]:
-            print(ANSI.RED + str(n) + ANSI.END, end=" ", flush=True)
+            print(ANSI.RED, str(n), ANSI.END, sep="", end=" ", flush=True)
         else:
             print(n, end=" ", flush=True)
             sum += n
 
-    print("\n" + ANSI.BOLD + str(sum) + ANSI.END + "\n")
+    print("\n", ANSI.BOLD, str(sum), ANSI.END, "\n", sep="")
 
     return sum
 
@@ -186,11 +195,14 @@ def rollDice(input):
     return total
 
 
+# clear screen
+print(ANSI.CLEAR, end="")
+
 # loop through commands
 while 1:
 
     # take input
-    i = input(ANSI.BLUE + "\nEnter Value: " + ANSI.END).strip().lower()
+    i = input(ANSI.BLUE + "Enter Value: " + ANSI.END).strip().lower()
 
     # help
     if i == "help" or i == "info":
@@ -199,19 +211,25 @@ while 1:
 
     # quit program
     elif i == "exit" or i == "end" or i == "quit" or i == "q":
+        # print(ANSI.CLEAR, end="")
         break
+
+    elif i == "clear":
+        print(ANSI.CLEAR, end="")
 
     # same as last input
     elif i == "":
-        rollDice(pRoll)
+        pAns = parseString(pRoll)
+        print(ANSI.BOLD, "total = ", str(pAns), ANSI.END, sep="")
 
-    elif re.match(r"^mo{2,}$", i):
+    elif mooRegex.match(i):
         print()
         print("Moo")
 
     else:
         try:
-            print(ANSI.BOLD + "total = " + str(parseInput(i)) + ANSI.END)
+            pAns = parseString(i)
+            print(ANSI.BOLD, "total = ", str(pAns), ANSI.END, sep="")
             pRoll = i
         except ValueError as e:
             print(e)
