@@ -2,17 +2,16 @@
 
 import random
 import re
+import math
 
 # TODO:
 # add parenthesis support
-# print math better
-# handle arrow keys (probably not going to happen)
 # add more shortcuts as needed
-# add more math (√, min/max, trigonometric). I don't acutally know why I would ever use this but here we are
+# print math better (probably not happening)
+# handle arrow keys (also probably not going to happen)
+
 
 # define ANSI colors
-
-
 class ANSI:
     RED = '\033[91m'
     BLUE = '\033[94m'
@@ -25,15 +24,12 @@ class ANSI:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
     END = '\033[0m'
-    CLEAR = '\033[2J\033[0;0H'
+    CLEAR = '\033[2J\033[H'
 
+# number of decimal places shown in output
+decimalNum = 5
 
-# help text
-helpText = ""
-with open("InfoText.txt", "r") as filehandle:
-    helpText = filehandle.read()
-
-# set default roll
+# set default roll and answer
 pRoll = "1d20"
 pAns = 0
 
@@ -44,16 +40,28 @@ floatRegex = re.compile(r"^\d*\.\d+$")
 multRegex = re.compile(r"[\*/%]")
 addRegex = re.compile(r"[\+-]")
 mooRegex = re.compile(r"^mo{2,}$")
+funcRegex = re.compile(r"^\w+ ?\(.*\)$")
+
+
+# help text
+helpText = ""
+with open("InfoText.txt", "r") as filehandle:
+    helpText = filehandle.read()
 
 
 def parseString(input):
     input = input.strip()
 
+    ### this will cause interference when parenthesis are implemented
+    # if the input is a function solve it
+    if funcRegex.match(input):
+        return parseFunc(input)
+
     # do math if there are any math symbols
     mathStrings = ("+", "-", "*", "/", "%", "^")
     for sub in mathStrings:
         if sub in input:
-            return math(input)
+            return parseMath(input)
 
     # if it's valid dice notation roll it
     if diceRegex.match(input):
@@ -70,8 +78,16 @@ def parseString(input):
     if input == "":
         return 0
 
+    # gives the last valid answer
     if input == "ans":
         return pAns
+
+    # booleans
+    if input == "true":
+        return 1
+
+    if input == "false":
+        return 0
 
     # handle shortcuts
     if input == "t":
@@ -86,7 +102,90 @@ def parseString(input):
     raise ValueError("Invalid Input")
 
 
-def math(input):
+def parseFunc(input):
+    function = re.search("^\w+(?= ?\()", input).group()
+    inner = re.search("(?<=\().*(?=\)$)", input).group()
+
+    # TODO: nested functions crash if the inner contains commas
+    # nested functions should be solved before splitting
+    args = [parseString(i) for i in inner.split(",")]
+    argNum = len(args)
+
+    if argNum == 0:
+        raise ValueError("No function arguments given")
+
+    if function == "abs":
+        if argNum > 1:
+            raise ValueError("Abs function takes only one argument")
+        return abs(args[0])
+
+    if function == "min":
+        if argNum == 1:
+            raise ValueError("Min function takes two or more arguments")
+        return min(args)
+
+    if function == "max":
+        if argNum == 1:
+            raise ValueError("Max function takes two or more arguments")
+        return max(args)
+
+    if function == "sqrt":
+        if argNum > 1:
+            raise ValueError("Sqrt function takes only one argument")
+        return math.sqrt(args[0])
+
+    if function == "sin":
+        if argNum > 2:
+            raise ValueError("Sin function takes one or two arguments")
+        if argNum == 2 and args[1] == True:
+            return math.sin(math.radians(args[0]))
+        return math.sin(args[0])
+
+    if function == "cos":
+        if argNum > 2:
+            raise ValueError("Cos function takes one or two arguments")
+        if argNum == 2 and args[1] == True:
+            return math.cos(math.radians(args[0]))
+        return math.cos(args[0])
+
+    if function == "tan":
+        if argNum > 2:
+            raise ValueError("Tan function takes one or two arguments")
+        if argNum == 2 and args[1] == True:
+            return math.tan(math.radians(args[0]))
+        return math.tan(args[0])
+
+    if function == "pow":
+        if argNum != 2:
+            raise ValueError("Pow function takes exactly two arguments")
+        return pow(args[0],args[1])
+
+    if function == "round":
+        if argNum > 1:
+            raise ValueError("Round function takes only one argument")
+        return round(args[0])
+
+    if function == "floor":
+        if argNum > 1:
+            raise ValueError("Floor function takes only one argument")
+        return math.floor(args[0])
+
+    if function == "ceil" or function == "ceiling":
+        if argNum > 1:
+            raise ValueError("Ceil function takes only one argument")
+        return math.ceil(args[0])
+
+    if function == "log":
+        if argNum > 2:
+            raise ValueError("Log function takes one or two arguments")
+        if argNum == 2:
+            return math.log(args[0],args[1])
+        return math.log(args[0])
+
+    raise ValueError("Invalid Function Name")
+
+
+def parseMath(input):
     # first seperate into order of operations, then find the first symbol
     # split the text before and after the symbol apart then solve recursively
 
@@ -219,7 +318,9 @@ while 1:
 
     # same as last input
     elif i == "":
-        pAns = parseString(pRoll)
+        pAns = round(parseString(pRoll), decimalNum)
+        if float(pAns).is_integer:
+            pAns = int(pAns)
         print(ANSI.BOLD, "total = ", str(pAns), ANSI.END, sep="")
 
     elif mooRegex.match(i):
@@ -228,7 +329,9 @@ while 1:
 
     else:
         try:
-            pAns = parseString(i)
+            pAns = round(parseString(i), decimalNum)
+            if float(pAns).is_integer:
+                pAns = int(pAns)
             print(ANSI.BOLD, "total = ", str(pAns), ANSI.END, sep="")
             pRoll = i
         except ValueError as e:

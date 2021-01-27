@@ -7,7 +7,8 @@ The highest and lowest dice can be removed by adding 't' or 'b' to the end, resp
 Multiple dice can be rolled at the same time:
 #d# #d#
 
-Basic math is also supported
+Basic math is supported, as well as the following functions:
+abs, min, max, sqrt, sin, cos, tan
 
 Some common operations have shortcuts
 1d20: T
