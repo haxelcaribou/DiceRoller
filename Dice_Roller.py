@@ -8,7 +8,7 @@ import math
 # add parenthesis support
 # add more shortcuts as needed
 # print math better (probably not happening)
-# handle arrow keys (also probably not going to happen)
+# handle arrow keys (also probably not going to happen due to cross platform concerns)
 
 
 # define ANSI colors
@@ -25,6 +25,7 @@ class ANSI:
     UNDERLINE = '\033[4m'
     END = '\033[0m'
     CLEAR = '\033[2J\033[H'
+
 
 # number of decimal places shown in output
 decimalNum = 5
@@ -52,7 +53,7 @@ with open("InfoText.txt", "r") as filehandle:
 def parseString(input):
     input = input.strip()
 
-    ### this will cause interference when parenthesis are implemented
+    # this will cause interference when parenthesis are implemented
     # if the input is a function solve it
     if funcRegex.match(input):
         return parseFunc(input)
@@ -158,7 +159,7 @@ def parseFunc(input):
     if function == "pow":
         if argNum != 2:
             raise ValueError("Pow function takes exactly two arguments")
-        return pow(args[0],args[1])
+        return pow(args[0], args[1])
 
     if function == "round":
         if argNum > 1:
@@ -179,7 +180,7 @@ def parseFunc(input):
         if argNum > 2:
             raise ValueError("Log function takes one or two arguments")
         if argNum == 2:
-            return math.log(args[0],args[1])
+            return math.log(args[0], args[1])
         return math.log(args[0])
 
     raise ValueError("Invalid Function Name")
@@ -188,10 +189,17 @@ def parseFunc(input):
 def parseMath(input):
     # first seperate into order of operations, then find the first symbol
     # split the text before and after the symbol apart then solve recursively
+    # highest priority operations will be at the lowest recursion levels
 
-    if "^" in input:
-        parts = input.split("^", 2)
-        return parseString(parts[0]) ** parseString(parts[1])
+    if "+" in input or "-" in input:
+        delimiter = addRegex.search(input).group(0)
+        parts = input.split(delimiter, 2)
+        r1 = parseString(parts[0])
+        r2 = parseString(parts[1])
+        if delimiter == "+":
+            return r1 + r2
+        if delimiter == "-":
+            return r1 - r2
 
     if "*" in input or "/" in input or "%" in input:
         delimiter = multRegex.search(input).group(0)
@@ -205,16 +213,10 @@ def parseMath(input):
         if delimiter == "%":
             return r1 % r2
 
-    if "+" in input or "-" in input:
-        delimiter = addRegex.search(input).group(0)
-        parts = input.split(delimiter, 2)
-        r1 = parseString(parts[0])
-        r2 = parseString(parts[1])
-        if delimiter == "+":
-            return r1 + r2
-        if delimiter == "-":
-            return r1 - r2
 
+    if "^" in input:
+        parts = input.split("^", 2)
+        return parseString(parts[0]) ** parseString(parts[1])
 
 def rollDie(input):
     print(ANSI.GREEN + input + ANSI.END)
