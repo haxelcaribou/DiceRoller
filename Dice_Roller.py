@@ -8,7 +8,6 @@ import math
 # TODO:
 # add parenthesis support
 # add more shortcuts as needed
-# print math better (probably not happening)
 # handle arrow keys (also probably not going to happen due to cross platform concerns)
 
 
@@ -27,9 +26,6 @@ class ANSI:
     END = '\033[0m'
     CLEAR = '\033[2J\033[H'
 
-
-# number of decimal places shown in output
-decimalNum = 5
 
 # set default roll and answer
 pRoll = "1d20"
@@ -188,39 +184,52 @@ def parseFunc(input):
 
 
 def parseMath(input):
-    # first seperate into order of operations, then find the first symbol
-    # split the text before and after the symbol apart then solve recursively
-    # highest priority operations will be at the lowest recursion levels
-
     if "+" in input or "-" in input:
         parts = addRegex.split(input)
         sum = parseString(parts[0])
+        output_string = "%g" % sum
         i = 1
         while i < len(parts):
+            ans = parseString(parts[i + 1])
             if parts[i] == "+":
-                sum += parseString(parts[i + 1])
+                sum += ans
+                output_string += " + "
             else:
-                sum -= parseString(parts[i + 1])
+                sum -= ans
+                output_string += " - "
+            output_string += "%g" % ans
             i += 2
+        print("%s = %g\n" % (output_string, sum))
         return sum
 
     if "*" in input or "/" in input or "%" in input:
         parts = multRegex.split(input)
         product = parseString(parts[0])
+        output_string = "%g" % product
         i = 1
         while i < len(parts):
+            ans = parseString(parts[i + 1])
             if parts[i] == "*":
-                product *= parseString(parts[i + 1])
+                product *= ans
+                output_string += " * "
             elif parts[i] == "/":
-                product /= parseString(parts[i + 1])
+                product /= ans
+                output_string += " / "
             else:
-                product %= parseString(parts[i + 1])
+                product %= ans
+                output_string += " % "
+            output_string += "%g" % ans
             i += 2
+        print("%s = %g\n" % (output_string, product))
         return product
 
     if "^" in input:
-        parts = input.split("^", 2)
-        return parseString(parts[0]) ** parseString(parts[1])
+        parts = input.split("^", 1)
+        base = parseString(parts[0])
+        exponent = parseString(parts[1])
+        power = base ** exponent
+        print("%g ^ %g = %g\n" % (base, exponent, power))
+        return power
 
 
 def rollDie(input):
@@ -325,10 +334,10 @@ while 1:
 
     # same as last input
     elif i == "":
-        pAns = round(parseString(pRoll), decimalNum)
+        pAns = parseString(pRoll)
         if float(pAns).is_integer:
             pAns = int(pAns)
-        print(ANSI.BOLD, "total = ", str(pAns), ANSI.END, sep="")
+        print(ANSI.BOLD, "total = %g" % pAns, ANSI.END, sep="")
 
     elif mooRegex.match(i):
         print()
@@ -336,10 +345,8 @@ while 1:
 
     else:
         try:
-            pAns = round(parseString(i), decimalNum)
-            if float(pAns).is_integer:
-                pAns = int(pAns)
-            print(ANSI.BOLD, "total = ", str(pAns), ANSI.END, sep="")
+            pAns = parseString(i)
+            print(ANSI.BOLD, "total = %g" % pAns, ANSI.END, sep="")
             pRoll = i
         except ValueError as e:
             print(e)
