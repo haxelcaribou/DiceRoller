@@ -187,7 +187,7 @@ def parseMath(input):
     if "+" in input or "-" in input:
         parts = addRegex.split(input)
         sum = parseString(parts[0])
-        output_string = "%g" % sum
+        output_string = "{:g}".format(sum)
         i = 1
         while i < len(parts):
             ans = parseString(parts[i + 1])
@@ -197,15 +197,15 @@ def parseMath(input):
             else:
                 sum -= ans
                 output_string += " - "
-            output_string += "%g" % ans
+            output_string += "{:g}".format(ans)
             i += 2
-        print("%s = %g\n" % (output_string, sum))
+        print("{} = {:g}\n".format(output_string, sum))
         return sum
 
     if "*" in input or "/" in input or "%" in input:
         parts = multRegex.split(input)
         product = parseString(parts[0])
-        output_string = "%g" % product
+        output_string = "{:g}".format(product)
         i = 1
         while i < len(parts):
             ans = parseString(parts[i + 1])
@@ -218,9 +218,9 @@ def parseMath(input):
             else:
                 product %= ans
                 output_string += " % "
-            output_string += "%g" % ans
+            output_string += "{:g}".format(ans)
             i += 2
-        print("%s = %g\n" % (output_string, product))
+        print("{} = {:g}\n".format(output_string, product))
         return product
 
     if "^" in input:
@@ -228,7 +228,7 @@ def parseMath(input):
         base = parseString(parts[0])
         exponent = parseString(parts[1])
         power = base ** exponent
-        print("%g ^ %g = %g\n" % (base, exponent, power))
+        print("{:g} ^ {:g} = {:g}\n".format(base, exponent, power))
         return power
 
 
@@ -337,7 +337,7 @@ while 1:
         pAns = parseString(pRoll)
         if float(pAns).is_integer:
             pAns = int(pAns)
-        print(ANSI.BOLD, "total = %g" % pAns, ANSI.END, sep="")
+        print(ANSI.BOLD, "total = {:g}".format(pAns), ANSI.END, sep="")
 
     elif mooRegex.match(i):
         print()
@@ -346,7 +346,7 @@ while 1:
     else:
         try:
             pAns = parseString(i)
-            print(ANSI.BOLD, "total = %g" % pAns, ANSI.END, sep="")
+            print(ANSI.BOLD, "total = {:g}".format(pAns), ANSI.END, sep="")
             pRoll = i
         except ValueError as e:
             print(e)
