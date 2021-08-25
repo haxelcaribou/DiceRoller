@@ -4,6 +4,7 @@ import random
 import re
 import math
 
+
 # TODO:
 # add parenthesis support
 # add more shortcuts as needed
@@ -38,8 +39,8 @@ pAns = 0
 diceRegex = re.compile(r"^(\d+d\d+((t|b)\d+)?(?=( |$)))+")
 intRegex = re.compile(r"^\d+$")
 floatRegex = re.compile(r"^\d*\.\d+$")
-multRegex = re.compile(r"[\*/%]")
-addRegex = re.compile(r"[\+-]")
+multRegex = re.compile(r"([\*/%])")
+addRegex = re.compile(r"([\+-])")
 mooRegex = re.compile(r"^mo{2,}$")
 funcRegex = re.compile(r"^\w+ ?\(.*\)$")
 
@@ -52,6 +53,13 @@ with open("InfoText.txt", "r") as filehandle:
 
 def parseString(input):
     input = input.strip()
+
+    # convert numbers to integers
+    if intRegex.match(input):
+        return int(input)
+    # also convert decimals
+    if floatRegex.match(input):
+        return float(input)
 
     # this will cause interference when parenthesis are implemented
     # if the input is a function solve it
@@ -67,13 +75,6 @@ def parseString(input):
     # if it's valid dice notation roll it
     if diceRegex.match(input):
         return rollDice(input)
-
-    # convert numbers to integers
-    if intRegex.match(input):
-        return int(input)
-    # also convert decimals
-    if floatRegex.match(input):
-        return float(input)
 
     # if either side of a math expression is empty replace it with zero
     if input == "":
@@ -192,31 +193,35 @@ def parseMath(input):
     # highest priority operations will be at the lowest recursion levels
 
     if "+" in input or "-" in input:
-        delimiter = addRegex.search(input).group(0)
-        parts = input.split(delimiter, 2)
-        r1 = parseString(parts[0])
-        r2 = parseString(parts[1])
-        if delimiter == "+":
-            return r1 + r2
-        if delimiter == "-":
-            return r1 - r2
+        parts = addRegex.split(input)
+        sum = parseString(parts[0])
+        i = 1
+        while i < len(parts):
+            if parts[i] == "+":
+                sum += parseString(parts[i + 1])
+            else:
+                sum -= parseString(parts[i + 1])
+            i += 2
+        return sum
 
     if "*" in input or "/" in input or "%" in input:
-        delimiter = multRegex.search(input).group(0)
-        parts = input.split(delimiter, 2)
-        r1 = parseString(parts[0])
-        r2 = parseString(parts[1])
-        if delimiter == "*":
-            return r1 * r2
-        if delimiter == "/":
-            return r1 / r2
-        if delimiter == "%":
-            return r1 % r2
-
+        parts = multRegex.split(input)
+        product = parseString(parts[0])
+        i = 1
+        while i < len(parts):
+            if parts[i] == "*":
+                product *= parseString(parts[i + 1])
+            elif parts[i] == "/":
+                product /= parseString(parts[i + 1])
+            else:
+                product %= parseString(parts[i + 1])
+            i += 2
+        return product
 
     if "^" in input:
         parts = input.split("^", 2)
         return parseString(parts[0]) ** parseString(parts[1])
+
 
 def rollDie(input):
     print(ANSI.GREEN + input + ANSI.END)
