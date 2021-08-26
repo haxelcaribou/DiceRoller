@@ -6,9 +6,9 @@ import math
 
 
 # TODO:
-# add parenthesis support
 # add more shortcuts as needed
-# handle arrow keys (also probably not going to happen due to cross platform concerns)
+# function printing
+# handle arrow keys (probably not going to happen due to cross platform concerns)
 
 
 # define ANSI colors
@@ -33,12 +33,12 @@ pAns = 0
 
 # compile regexes
 diceRegex = re.compile(r"^(\d+d\d+((t|b)\d+)?(?=( |$)))+")
-intRegex = re.compile(r"^\d+$")
-floatRegex = re.compile(r"^\d*\.\d+$")
+intRegex = re.compile(r"^-?\d+$")
+floatRegex = re.compile(r"^-?\d*\.\d+$")
 multRegex = re.compile(r"([\*/%])")
 addRegex = re.compile(r"([\+-])")
 mooRegex = re.compile(r"^mo{2,}$")
-funcRegex = re.compile(r"^\w+ ?\(.*\)$")
+funcRegex = re.compile(r"\w+$")
 
 
 # help text
@@ -56,11 +56,6 @@ def parseString(input):
     # also convert decimals
     if floatRegex.match(input):
         return float(input)
-
-    # this will cause interference when parenthesis are implemented
-    # if the input is a function solve it
-    if funcRegex.match(input):
-        return parseFunc(input)
 
     # do math if there are any math symbols
     mathStrings = ("+", "-", "*", "/", "%", "^")
@@ -96,17 +91,14 @@ def parseString(input):
         return rollDie("2d20t1")
     if input == "s":
         return rollDie("4d6b1")
+    if input == "s6":
+        return rollDice("4d6b1 4d6b1 4d6b1 4d6b1 4d6b1 4d6b1")
 
     raise ValueError("Invalid Input")
 
 
-def parseFunc(input):
-    function = re.search("^\w+(?= ?\()", input).group()
-    inner = re.search("(?<=\().*(?=\)$)", input).group()
-
-    # TODO: nested functions crash if the inner contains commas
-    # nested functions should be solved before splitting
-    args = [parseString(i) for i in inner.split(",")]
+def parseFunc(function, input):
+    args = [parseString(i) for i in input.split(",")]
     argNum = len(args)
 
     if argNum == 0:
@@ -114,73 +106,121 @@ def parseFunc(input):
 
     if function == "abs":
         if argNum > 1:
-            raise ValueError("Abs function takes only one argument")
-        return abs(args[0])
+            raise ValueError(
+                "Abs function takes only one argument")
+        result = abs(args[0])
 
-    if function == "min":
+    elif function == "min":
         if argNum == 1:
-            raise ValueError("Min function takes two or more arguments")
-        return min(args)
+            raise ValueError(
+                "Min function takes two or more arguments")
+        result = min(args)
 
-    if function == "max":
+    elif function == "max":
         if argNum == 1:
-            raise ValueError("Max function takes two or more arguments")
-        return max(args)
+            raise ValueError(
+                "Max function takes two or more arguments")
+        result = max(args)
 
-    if function == "sqrt":
+    elif function == "sqrt":
         if argNum > 1:
-            raise ValueError("Sqrt function takes only one argument")
-        return math.sqrt(args[0])
+            raise ValueError(
+                "Sqrt function takes only one argument")
+        result = math.sqrt(args[0])
 
-    if function == "sin":
+    elif function == "sin":
         if argNum > 2:
-            raise ValueError("Sin function takes one or two arguments")
+            raise ValueError(
+                "Sin function takes one or two arguments")
         if argNum == 2 and args[1] == True:
-            return math.sin(math.radians(args[0]))
-        return math.sin(args[0])
+            result = math.sin(math.radians(args[0]))
+        result = math.sin(args[0])
 
-    if function == "cos":
+    elif function == "cos":
         if argNum > 2:
-            raise ValueError("Cos function takes one or two arguments")
+            raise ValueError(
+                "Cos function takes one or two arguments")
         if argNum == 2 and args[1] == True:
-            return math.cos(math.radians(args[0]))
-        return math.cos(args[0])
+            result = math.cos(math.radians(args[0]))
+        result = math.cos(args[0])
 
-    if function == "tan":
+    elif function == "tan":
         if argNum > 2:
-            raise ValueError("Tan function takes one or two arguments")
+            raise ValueError(
+                "Tan function takes one or two arguments")
         if argNum == 2 and args[1] == True:
-            return math.tan(math.radians(args[0]))
-        return math.tan(args[0])
+            result = math.tan(math.radians(args[0]))
+        result = math.tan(args[0])
 
-    if function == "pow":
+    elif function == "pow":
         if argNum != 2:
-            raise ValueError("Pow function takes exactly two arguments")
-        return pow(args[0], args[1])
+            raise ValueError(
+                "Pow function takes exactly two arguments")
+        result = pow(args[0], args[1])
 
-    if function == "round":
+    elif function == "round":
         if argNum > 1:
-            raise ValueError("Round function takes only one argument")
-        return round(args[0])
+            raise ValueError(
+                "Round function takes only one argument")
+        result = round(args[0])
 
-    if function == "floor":
+    elif function == "floor":
         if argNum > 1:
-            raise ValueError("Floor function takes only one argument")
-        return math.floor(args[0])
+            raise ValueError(
+                "Floor function takes only one argument")
+        result = math.floor(args[0])
 
-    if function == "ceil" or function == "ceiling":
+    elif function == "ceil" or function == "ceiling":
         if argNum > 1:
-            raise ValueError("Ceil function takes only one argument")
-        return math.ceil(args[0])
+            raise ValueError(
+                "Ceil function takes only one argument")
+        result = math.ceil(args[0])
 
-    if function == "log":
+    elif function == "log":
         if argNum > 2:
-            raise ValueError("Log function takes one or two arguments")
+            raise ValueError(
+                "Log function takes one or two arguments")
         if argNum == 2:
-            return math.log(args[0], args[1])
-        return math.log(args[0])
+            result = math.log(args[0], args[1])
+        result = math.log(args[0])
+
+    if result:
+        args_list = ", ".join(map(lambda a : "{:g}".format(a), args))
+        print("{}({}) = {:g}\n".format(function, args_list, result))
+        return result
 
     raise ValueError("Invalid Function Name")
+
+
+def parseParens(input):
+    parens = []
+    i = 0
+    while i < len(input):
+        c = input[i]
+        if c == "(":
+            parens.append(i)
+        elif c == ")":
+            begin = parens.pop()
+            end = i
+            before = input[:begin].strip()
+            inner = input[begin + 1:end].strip()
+            after = input[end + 1:].strip()
+
+            function_match = funcRegex.search(before)
+            if function_match:
+                function = function_match.group()
+                inner = parseFunc(function, inner)
+                before = before[:-len(function)]
+            else:
+                inner = parseString(inner)
+
+            input = before + str(inner) + after
+            i = begin
+        i += 1
+
+    if len(parens) == 0:
+        return parseString(input)
+    raise ValueError("Unmatched Parenthesis")
 
 
 def parseMath(input):
@@ -313,7 +353,7 @@ def rollDice(input):
 # clear screen
 print(ANSI.CLEAR, end="")
 
-# loop through commands
+# keep taking commands
 while 1:
 
     # take input
@@ -334,7 +374,7 @@ while 1:
 
     # same as last input
     elif i == "":
-        pAns = parseString(pRoll)
+        pAns = parseParens(pRoll)
         if float(pAns).is_integer:
             pAns = int(pAns)
         print(ANSI.BOLD, "total = {:g}".format(pAns), ANSI.END, sep="")
@@ -345,7 +385,7 @@ while 1:
 
     else:
         try:
-            pAns = parseString(i)
+            pAns = parseParens(i)
             print(ANSI.BOLD, "total = {:g}".format(pAns), ANSI.END, sep="")
             pRoll = i
         except ValueError as e:
