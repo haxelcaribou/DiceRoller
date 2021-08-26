@@ -7,7 +7,6 @@ import math
 
 # TODO:
 # add more shortcuts as needed
-# function printing
 # handle arrow keys (probably not going to happen due to cross platform concerns)
 
 
@@ -28,8 +27,8 @@ class ANSI:
 
 
 # set default roll and answer
-pRoll = "1d20"
-pAns = 0
+p_roll = "1d20"
+p_ans = 0
 
 # compile regexes
 diceRegex = re.compile(r"^(\d+d\d+((t|b)\d+)?(?=( |$)))+")
@@ -73,7 +72,7 @@ def parseString(input):
 
     # gives the last valid answer
     if input == "ans":
-        return pAns
+        return p_ans
 
     # booleans
     if input == "true":
@@ -185,7 +184,7 @@ def parseFunc(function, input):
         result = math.log(args[0])
 
     if result:
-        args_list = ", ".join(map(lambda a : "{:g}".format(a), args))
+        args_list = ", ".join(map(lambda a: "{:g}".format(a), args))
         print("{}({}) = {:g}\n".format(function, args_list, result))
         return result
 
@@ -374,10 +373,10 @@ while 1:
 
     # same as last input
     elif i == "":
-        pAns = parseParens(pRoll)
-        if float(pAns).is_integer:
-            pAns = int(pAns)
-        print(ANSI.BOLD, "total = {:g}".format(pAns), ANSI.END, sep="")
+        p_ans = parseParens(p_roll)
+        if float(p_ans).is_integer:
+            p_ans = int(p_ans)
+        print(ANSI.BOLD, "total = {:g}".format(p_ans), ANSI.END, sep="")
 
     elif mooRegex.match(i):
         print()
@@ -385,9 +384,9 @@ while 1:
 
     else:
         try:
-            pAns = parseParens(i)
-            print(ANSI.BOLD, "total = {:g}".format(pAns), ANSI.END, sep="")
-            pRoll = i
+            p_ans = parseParens(i)
+            print(ANSI.BOLD, "total = {:g}".format(p_ans), ANSI.END, sep="")
+            p_roll = i
         except ValueError as e:
             print(e)
         except ZeroDivisionError:
