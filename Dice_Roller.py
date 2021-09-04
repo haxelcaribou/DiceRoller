@@ -133,7 +133,8 @@ def parseFunc(function, input):
                 "Sin function takes one or two arguments")
         if argNum == 2 and args[1] == True:
             result = math.sin(math.radians(args[0]))
-        result = math.sin(args[0])
+        else:
+            result = math.sin(args[0])
 
     elif function == "cos":
         if argNum > 2:
@@ -141,7 +142,8 @@ def parseFunc(function, input):
                 "Cos function takes one or two arguments")
         if argNum == 2 and args[1] == True:
             result = math.cos(math.radians(args[0]))
-        result = math.cos(args[0])
+        else:
+            result = math.cos(args[0])
 
     elif function == "tan":
         if argNum > 2:
@@ -149,7 +151,8 @@ def parseFunc(function, input):
                 "Tan function takes one or two arguments")
         if argNum == 2 and args[1] == True:
             result = math.tan(math.radians(args[0]))
-        result = math.tan(args[0])
+        else:
+            result = math.tan(args[0])
 
     elif function == "pow":
         if argNum != 2:
@@ -181,7 +184,8 @@ def parseFunc(function, input):
                 "Log function takes one or two arguments")
         if argNum == 2:
             result = math.log(args[0], args[1])
-        result = math.log(args[0])
+        else:
+            result = math.log(args[0])
 
     if result:
         args_list = ", ".join(map(lambda a: "{:g}".format(a), args))
