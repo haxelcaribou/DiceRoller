@@ -4,10 +4,19 @@ import random
 import re
 import math
 
+# At some point I'm just making a math interpeter
 
 # TODO:
 # add more shortcuts as needed
-# handle arrow keys (probably not going to happen due to cross platform concerns)
+# better output for empty functions
+
+
+# import the readline module for arrow functionality if it exists
+try:
+    import readline
+    readline.set_history_length(100)
+except:
+    pass
 
 
 # define ANSI colors
@@ -81,6 +90,18 @@ def parseString(input):
     if input == "false":
         return 0
 
+    # constants
+    if input == "pi":
+        return math.pi
+    if input == "tau":
+        return math.tau
+    if input == "euler":
+        return math.e
+    if input == "nan":
+        return math.nan
+    if input == "inf":
+        return math.inf
+
     # handle shortcuts
     if input == "t":
         return rollDie("1d20")
@@ -91,7 +112,9 @@ def parseString(input):
     if input == "s":
         return rollDie("4d6b1")
     if input == "s6":
-        return rollDice("4d6b1 4d6b1 4d6b1 4d6b1 4d6b1 4d6b1")
+        return parseString("4d6b1 + 4d6b1 + 4d6b1 + 4d6b1 + 4d6b1 + 4d6b1")
+    if input == "s8":
+        return parseString("4d6b1 + 4d6b1 + 4d6b1 + 4d6b1 + 4d6b1 + 4d6b1 + 4d6b1 + 4d6b1")
 
     raise ValueError("Invalid Input")
 
@@ -100,37 +123,39 @@ def parseFunc(function, input):
     args = [parseString(i) for i in input.split(",")]
     argNum = len(args)
 
-    if argNum == 0:
-        raise ValueError("No function arguments given")
-
     if function == "abs":
         if argNum > 1:
-            raise ValueError(
-                "Abs function takes only one argument")
+            raise ValueError("Abs function takes only one argument")
         result = abs(args[0])
 
     elif function == "min":
         if argNum == 1:
-            raise ValueError(
-                "Min function takes two or more arguments")
+            raise ValueError("Min function takes two or more arguments")
         result = min(args)
 
     elif function == "max":
         if argNum == 1:
-            raise ValueError(
-                "Max function takes two or more arguments")
+            raise ValueError("Max function takes two or more arguments")
         result = max(args)
 
     elif function == "sqrt":
         if argNum > 1:
-            raise ValueError(
-                "Sqrt function takes only one argument")
+            raise ValueError("Sqrt function takes only one argument")
         result = math.sqrt(args[0])
+
+    elif function == "degrees":
+        if argNum > 1:
+            raise ValueError("Degrees function takes only one argument")
+        result = math.degrees(args[0])
+
+    elif function == "radians":
+        if argNum > 1:
+            raise ValueError("Radians function takes only one argument")
+        result = math.radians(args[0])
 
     elif function == "sin":
         if argNum > 2:
-            raise ValueError(
-                "Sin function takes one or two arguments")
+            raise ValueError("Sin function takes one or two arguments")
         if argNum == 2 and args[1] == True:
             result = math.sin(math.radians(args[0]))
         else:
@@ -138,8 +163,7 @@ def parseFunc(function, input):
 
     elif function == "cos":
         if argNum > 2:
-            raise ValueError(
-                "Cos function takes one or two arguments")
+            raise ValueError("Cos function takes one or two arguments")
         if argNum == 2 and args[1] == True:
             result = math.cos(math.radians(args[0]))
         else:
@@ -147,45 +171,74 @@ def parseFunc(function, input):
 
     elif function == "tan":
         if argNum > 2:
-            raise ValueError(
-                "Tan function takes one or two arguments")
+            raise ValueError("Tan function takes one or two arguments")
         if argNum == 2 and args[1] == True:
             result = math.tan(math.radians(args[0]))
         else:
             result = math.tan(args[0])
 
+    elif function == "atan2":
+        if argNum > 3 or argNum < 2:
+            raise ValueError("atan function takes two or three arguments")
+        if argNum == 3 and args[2] == True:
+            result = math.degrees(math.atan2(args[0], args[1]))
+        else:
+            result = math.atan2(args[0], args[1])
+
+    elif function == "asin":
+        if argNum > 2:
+            raise ValueError("Asin function takes one or two arguments")
+        if argNum == 2 and args[1] == True:
+            result = math.degrees(math.asin(args[0]))
+        else:
+            result = math.asin(args[0])
+
+    elif function == "acos":
+        if argNum > 2:
+            raise ValueError("Acos function takes one or two arguments")
+        if argNum == 2 and args[1] == True:
+            result = math.degrees(math.acos(args[0]))
+        else:
+            result = math.acos(args[0])
+
+    elif function == "atan":
+        if argNum > 2:
+            raise ValueError("Atan function takes one or two arguments")
+        if argNum == 2 and args[1] == True:
+            result = math.degrees(math.atan(args[0]))
+        else:
+            result = math.atan(args[0])
+
     elif function == "pow":
         if argNum != 2:
-            raise ValueError(
-                "Pow function takes exactly two arguments")
+            raise ValueError("Pow function takes exactly two arguments")
         result = pow(args[0], args[1])
 
     elif function == "round":
         if argNum > 1:
-            raise ValueError(
-                "Round function takes only one argument")
+            raise ValueError("Round function takes only one argument")
         result = round(args[0])
 
     elif function == "floor":
         if argNum > 1:
-            raise ValueError(
-                "Floor function takes only one argument")
+            raise ValueError("Floor function takes only one argument")
         result = math.floor(args[0])
 
     elif function == "ceil" or function == "ceiling":
         if argNum > 1:
-            raise ValueError(
-                "Ceil function takes only one argument")
+            raise ValueError("Ceil function takes only one argument")
         result = math.ceil(args[0])
 
     elif function == "log":
         if argNum > 2:
-            raise ValueError(
-                "Log function takes one or two arguments")
+            raise ValueError("Log function takes one or two arguments")
         if argNum == 2:
             result = math.log(args[0], args[1])
         else:
             result = math.log(args[0])
+
+    elif function == "avg":
+        result = math.fsum(args) / len(args)
 
     if result:
         args_list = ", ".join(map(lambda a: "{:g}".format(a), args))
