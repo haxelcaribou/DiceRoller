@@ -9,13 +9,15 @@ import math
 # TODO:
 # add more shortcuts as needed
 # better output for empty functions
+# >>> testing <<<
+# fix negative parenthesis returns
 
 
 # import the readline module for arrow functionality if it exists
 try:
     import readline
     readline.set_history_length(100)
-except:
+except ImportError:
     pass
 
 
@@ -36,8 +38,7 @@ class ANSI:
 
 
 # set default roll and answer
-p_roll = "1d20"
-p_ans = 0
+ans = 0
 
 # compile regexes
 diceRegex = re.compile(r"^(\d+d\d+((t|b)\d+)?(?=( |$)))+")
@@ -81,7 +82,7 @@ def parseString(input):
 
     # gives the last valid answer
     if input == "ans":
-        return p_ans
+        return ans
 
     # booleans
     if input == "true":
@@ -286,14 +287,14 @@ def parseMath(input):
         output_string = "{:g}".format(sum)
         i = 1
         while i < len(parts):
-            ans = parseString(parts[i + 1])
+            term = parseString(parts[i + 1])
             if parts[i] == "+":
-                sum += ans
+                sum += term
                 output_string += " + "
             else:
-                sum -= ans
+                sum -= term
                 output_string += " - "
-            output_string += "{:g}".format(ans)
+            output_string += "{:g}".format(term)
             i += 2
         print("{} = {:g}\n".format(output_string, sum))
         return sum
@@ -304,17 +305,17 @@ def parseMath(input):
         output_string = "{:g}".format(product)
         i = 1
         while i < len(parts):
-            ans = parseString(parts[i + 1])
+            term = parseString(parts[i + 1])
             if parts[i] == "*":
-                product *= ans
+                product *= term
                 output_string += " * "
             elif parts[i] == "/":
-                product /= ans
+                product /= term
                 output_string += " / "
             else:
-                product %= ans
+                product %= term
                 output_string += " % "
-            output_string += "{:g}".format(ans)
+            output_string += "{:g}".format(term)
             i += 2
         print("{} = {:g}\n".format(output_string, product))
         return product
@@ -370,6 +371,9 @@ def removeDice(num, dice, remove, top):
         rolls.append(info)
 
     sortedRolls = sorted(rolls, key=lambda item: item.get("roll"))
+
+    if remove > num:
+        raise ValueError("More dice removed than rolled")
 
     # print and sum
     if top:
@@ -428,22 +432,14 @@ while 1:
     elif i == "clear":
         print(ANSI.CLEAR, end="")
 
-    # same as last input
-    elif i == "":
-        p_ans = parseParens(p_roll)
-        if float(p_ans).is_integer:
-            p_ans = int(p_ans)
-        print(ANSI.BOLD, "total = {:g}".format(p_ans), ANSI.END, sep="")
-
     elif mooRegex.match(i):
         print()
         print("Moo")
 
     else:
         try:
-            p_ans = parseParens(i)
-            print(ANSI.BOLD, "total = {:g}".format(p_ans), ANSI.END, sep="")
-            p_roll = i
+            ans = parseParens(i)
+            print(ANSI.BOLD, "total = {:g}".format(ans), ANSI.END, sep="")
         except ValueError as e:
             print(e)
         except ZeroDivisionError:
