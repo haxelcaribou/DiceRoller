@@ -3,6 +3,7 @@
 import random
 import re
 import math
+from os import system, name
 
 # At some point I'm just making a math interpeter
 
@@ -410,8 +411,17 @@ def rollDice(input):
     return total
 
 
+def clearScreen():
+    if name == 'nt':
+        system('cls')
+    elif name == "posix":
+        system('clear')
+    else:
+        print(ANSI.CLEAR, end="")
+
+
 # clear screen
-print(ANSI.CLEAR, end="")
+clearScreen()
 
 # keep taking commands
 while 1:
@@ -426,11 +436,11 @@ while 1:
 
     # quit program
     elif i == "exit" or i == "end" or i == "quit" or i == "q":
-        # print(ANSI.CLEAR, end="")
+        clearScreen()
         break
 
     elif i == "clear":
-        print(ANSI.CLEAR, end="")
+        clearScreen()
 
     elif mooRegex.match(i):
         print()
