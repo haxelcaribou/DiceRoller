@@ -5,13 +5,13 @@ import re
 import math
 from os import system, name
 
-# At some point I'm just making a math interpeter
+# At this point I'm just making a math interpeter
 
 # TODO:
 # add more shortcuts as needed
 # better output for empty functions
 # >>> testing <<<
-# fix negative parenthesis returns
+# fix negative numbers
 
 
 # import the readline module for arrow functionality if it exists
@@ -38,15 +38,15 @@ class ANSI:
     CLEAR = '\033[2J\033[H'
 
 
-# set default roll and answer
+# set default answer
 ans = 0
 
 # compile regexes
 diceRegex = re.compile(r"^(\d+d\d+((t|b)\d+)?(?=( |$)))+")
-intRegex = re.compile(r"^-?\d+$")
-floatRegex = re.compile(r"^-?\d*\.\d+$")
+intRegex = re.compile(r"^-? ?\d+$")
+floatRegex = re.compile(r"^-? ?\d*\.\d+$")
 multRegex = re.compile(r"([\*/%])")
-addRegex = re.compile(r"([\+-])")
+addRegex = re.compile(r"((\+|(?<=\w) ?-))")
 mooRegex = re.compile(r"^mo{2,}$")
 funcRegex = re.compile(r"\w+$")
 
@@ -62,10 +62,10 @@ def parseString(input):
 
     # convert numbers to integers
     if intRegex.match(input):
-        return int(input)
+        return int(input.replace(" ",""))
     # also convert decimals
     if floatRegex.match(input):
-        return float(input)
+        return float(input.replace(" ",""))
 
     # do math if there are any math symbols
     mathStrings = ("+", "-", "*", "/", "%", "^")
@@ -119,7 +119,6 @@ def parseString(input):
         return parseString("4d6b1 + 4d6b1 + 4d6b1 + 4d6b1 + 4d6b1 + 4d6b1 + 4d6b1 + 4d6b1")
 
     raise ValueError("Invalid Input")
-
 
 def parseFunc(function, input):
     args = [parseString(i) for i in input.split(",")]
@@ -249,7 +248,6 @@ def parseFunc(function, input):
 
     raise ValueError("Invalid Function Name")
 
-
 def parseParens(input):
     parens = []
     i = 0
@@ -280,9 +278,8 @@ def parseParens(input):
         return parseString(input)
     raise ValueError("Unmatched Parenthesis")
 
-
 def parseMath(input):
-    if "+" in input or "-" in input:
+    if addRegex.match(input):
         parts = addRegex.split(input)
         sum = parseString(parts[0])
         output_string = "{:g}".format(sum)
@@ -329,6 +326,10 @@ def parseMath(input):
         print("{:g} ^ {:g} = {:g}\n".format(base, exponent, power))
         return power
 
+    if "-" in input:
+        return -parseString(input[1:])
+
+    raise ValueError("Invalid Input")
 
 def rollDie(input):
     print(ANSI.GREEN + input + ANSI.END)
@@ -357,7 +358,6 @@ def rollDie(input):
     print("\n", ANSI.BOLD, str(sum), ANSI.END, "\n", sep="")
 
     return sum
-
 
 def removeDice(num, dice, remove, top):
     rolls = []
@@ -399,7 +399,6 @@ def removeDice(num, dice, remove, top):
 
     return sum
 
-
 def rollDice(input):
     dice = input.split(" ")
 
@@ -410,7 +409,6 @@ def rollDice(input):
 
     return total
 
-
 def clearScreen():
     if name == 'nt':
         system('cls')
@@ -420,12 +418,11 @@ def clearScreen():
         print(ANSI.CLEAR, end="")
 
 
-# clear screen
+# clear screen at program start
 clearScreen()
 
 # keep taking commands
 while 1:
-
     # take input
     i = input(ANSI.BLUE + "Enter Value: " + ANSI.END).strip().lower()
 
@@ -443,8 +440,10 @@ while 1:
         clearScreen()
 
     elif mooRegex.match(i):
-        print()
-        print("Moo")
+        print("\nMoo")
+
+    elif i == "":
+        print("No Input Entered")
 
     else:
         try:
