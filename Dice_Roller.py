@@ -7,11 +7,13 @@ from os import system, name
 
 # At this point I'm just making a math interpeter
 
-# TODO:
+# TODO
+# option to get average, min, and max of rolls instead of specific roll value
+# - Use flag? 'Stats' keyword?
+# - How to deal with functions more complication than simple operators
+# - Possible simpler and seperate method or even seperate program entirely
 # add more shortcuts as needed
-# better output for empty functions
 # >>> testing <<<
-# fix negative numbers
 
 
 # import the readline module for arrow functionality if it exists
@@ -62,10 +64,10 @@ def parseString(input):
 
     # convert numbers to integers
     if intRegex.match(input):
-        return int(input.replace(" ",""))
+        return int(input.replace(" ", ""))
     # also convert decimals
     if floatRegex.match(input):
-        return float(input.replace(" ",""))
+        return float(input.replace(" ", ""))
 
     # do math if there are any math symbols
     mathStrings = ("+", "-", "*", "/", "%", "^")
@@ -120,6 +122,7 @@ def parseString(input):
 
     raise ValueError("Invalid Input")
 
+
 def parseFunc(function, input):
     args = [parseString(i) for i in input.split(",")]
     argNum = len(args)
@@ -144,12 +147,12 @@ def parseFunc(function, input):
             raise ValueError("Sqrt function takes only one argument")
         result = math.sqrt(args[0])
 
-    elif function == "degrees":
+    elif function == "degrees" or function == "deg":
         if argNum > 1:
             raise ValueError("Degrees function takes only one argument")
         result = math.degrees(args[0])
 
-    elif function == "radians":
+    elif function == "radians" or function == "rad":
         if argNum > 1:
             raise ValueError("Radians function takes only one argument")
         result = math.radians(args[0])
@@ -241,12 +244,13 @@ def parseFunc(function, input):
     elif function == "avg":
         result = math.fsum(args) / len(args)
 
-    if result:
-        args_list = ", ".join(map(lambda a: "{:g}".format(a), args))
-        print("{}({}) = {:g}\n".format(function, args_list, result))
-        return result
+    else:
+        raise ValueError("Invalid Function Name")
 
-    raise ValueError("Invalid Function Name")
+    args_list = ", ".join(map(lambda a: "{:g}".format(a), args))
+    print("{}({}) = {:g}\n".format(function, args_list, result))
+    return result
+
 
 def parseParens(input):
     parens = []
@@ -277,6 +281,7 @@ def parseParens(input):
     if len(parens) == 0:
         return parseString(input)
     raise ValueError("Unmatched Parenthesis")
+
 
 def parseMath(input):
     if addRegex.match(input):
@@ -331,6 +336,7 @@ def parseMath(input):
 
     raise ValueError("Invalid Input")
 
+
 def rollDie(input):
     print(ANSI.GREEN + input + ANSI.END)
 
@@ -358,6 +364,7 @@ def rollDie(input):
     print("\n", ANSI.BOLD, str(sum), ANSI.END, "\n", sep="")
 
     return sum
+
 
 def removeDice(num, dice, remove, top):
     rolls = []
@@ -399,6 +406,7 @@ def removeDice(num, dice, remove, top):
 
     return sum
 
+
 def rollDice(input):
     dice = input.split(" ")
 
@@ -408,6 +416,7 @@ def rollDice(input):
         total += rollDie(die.strip())
 
     return total
+
 
 def clearScreen():
     if name == 'nt':
