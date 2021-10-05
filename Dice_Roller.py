@@ -426,39 +426,42 @@ def clearScreen():
     else:
         print(ANSI.CLEAR, end="")
 
+def run():
+    # clear screen at program start
+    clearScreen()
 
-# clear screen at program start
-clearScreen()
+    # keep taking commands
+    while 1:
+        # take input
+        i = input(ANSI.BLUE + "Enter Value: " + ANSI.END).strip().lower()
 
-# keep taking commands
-while 1:
-    # take input
-    i = input(ANSI.BLUE + "Enter Value: " + ANSI.END).strip().lower()
+        # help
+        if i == "help" or i == "info":
+            print()
+            print(helpText)
 
-    # help
-    if i == "help" or i == "info":
-        print()
-        print(helpText)
+        # quit program
+        elif i == "exit" or i == "end" or i == "quit" or i == "q":
+            clearScreen()
+            break
 
-    # quit program
-    elif i == "exit" or i == "end" or i == "quit" or i == "q":
-        clearScreen()
-        break
+        elif i == "clear":
+            clearScreen()
 
-    elif i == "clear":
-        clearScreen()
+        elif mooRegex.match(i):
+            print("\nMoo")
 
-    elif mooRegex.match(i):
-        print("\nMoo")
+        elif i == "":
+            print("No Input Entered")
 
-    elif i == "":
-        print("No Input Entered")
+        else:
+            try:
+                ans = parseParens(i)
+                print(ANSI.BOLD, "total = {:g}".format(ans), ANSI.END, sep="")
+            except ValueError as e:
+                print(e)
+            except ZeroDivisionError:
+                print("Divide by Zero")
 
-    else:
-        try:
-            ans = parseParens(i)
-            print(ANSI.BOLD, "total = {:g}".format(ans), ANSI.END, sep="")
-        except ValueError as e:
-            print(e)
-        except ZeroDivisionError:
-            print("Divide by Zero")
+if __name__ == '__main__':
+    run()
