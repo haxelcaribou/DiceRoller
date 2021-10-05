@@ -133,13 +133,9 @@ def parseFunc(function, input):
         result = abs(args[0])
 
     elif function == "min":
-        if argNum == 1:
-            raise ValueError("Min function takes two or more arguments")
         result = min(args)
 
     elif function == "max":
-        if argNum == 1:
-            raise ValueError("Max function takes two or more arguments")
         result = max(args)
 
     elif function == "sqrt":
@@ -425,6 +421,8 @@ def clearScreen():
         system('clear')
     else:
         print(ANSI.CLEAR, end="")
+
+
 
 def run():
     # clear screen at program start
