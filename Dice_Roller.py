@@ -48,7 +48,7 @@ diceRegex = re.compile(r"^(\d+d\d+((t|b)\d+)?(?=( |$)))+")
 intRegex = re.compile(r"^-? ?\d+$")
 floatRegex = re.compile(r"^-? ?\d*\.\d+$")
 multRegex = re.compile(r"([\*/%])")
-addRegex = re.compile(r"((\+|(?<=\w) ?-))")
+addRegex = re.compile(r"(\+|(?<=\w) ?-)")
 mooRegex = re.compile(r"^mo{2,}$")
 funcRegex = re.compile(r"\w+$")
 
@@ -280,7 +280,7 @@ def parseParens(input):
 
 
 def parseMath(input):
-    if addRegex.match(input):
+    if addRegex.search(input):
         parts = addRegex.split(input)
         sum = parseString(parts[0])
         output_string = "{:g}".format(sum)
