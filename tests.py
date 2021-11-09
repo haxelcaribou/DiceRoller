@@ -80,7 +80,7 @@ class TestDiceRoller(unittest.TestCase):
 
         self.assertEqual(dice.parseFunc("log", "2,2"), 1)
         self.assertEqual(dice.parseFunc("log", "8,2"), 3)
-        self.assertEqual(dice.parseFunc("log", "10,3"), math.log(10,3))
+        self.assertEqual(dice.parseFunc("log", "10,3"), math.log(10, 3))
         self.assertEqual(dice.parseFunc("log", "2"), math.log(2))
         self.assertEqual(dice.parseFunc("log", "10"), math.log(10))
 
@@ -88,6 +88,54 @@ class TestDiceRoller(unittest.TestCase):
         self.assertEqual(dice.parseFunc("avg", "10"), 10)
         self.assertEqual(dice.parseFunc("avg", "10, 0"), 5)
 
+    def test_math(self):
+        self.assertEqual(dice.parseMath("-1"), -1)
+        self.assertEqual(dice.parseMath("-10"), -10)
+        self.assertEqual(dice.parseMath("-1030"), -1030)
+
+        self.assertEqual(dice.parseMath("1+1"), 2)
+        self.assertEqual(dice.parseMath("1+10"), 11)
+        self.assertEqual(dice.parseMath("10+20+30"), 60)
+
+        self.assertEqual(dice.parseMath("1-1"), 0)
+        self.assertEqual(dice.parseMath("1-10"), -9)
+        self.assertEqual(dice.parseMath("10-20-30"), -40)
+
+        self.assertEqual(dice.parseMath("1*1"), 1)
+        self.assertEqual(dice.parseMath("1*10"), 10)
+        self.assertEqual(dice.parseMath("10*20*30"), 10 * 20 * 30)
+
+        self.assertEqual(dice.parseMath("1/1"), 1)
+        self.assertEqual(dice.parseMath("1/10"), 0.1)
+        self.assertEqual(dice.parseMath("10/20/30"), 10 / 20 / 30)
+
+        self.assertEqual(dice.parseMath("2%2"), 0)
+        self.assertEqual(dice.parseMath("1%2"), 1)
+        self.assertEqual(dice.parseMath("11%10"), 1)
+        self.assertEqual(dice.parseMath("1030%30"), 10)
+        self.assertEqual(dice.parseMath("-2%2"), 0)
+        self.assertEqual(dice.parseMath("-1%2"), 1)
+        self.assertEqual(dice.parseMath("-11%10"), 9)
+        self.assertEqual(dice.parseMath("-1030%30"), 20)
+
+        self.assertEqual(dice.parseMath("1^1"), 1)
+        self.assertEqual(dice.parseMath("2^3"), 8)
+        self.assertEqual(dice.parseMath("10^0"), 1)
+        self.assertEqual(dice.parseMath("2^-2"), 0.25)
+
+        self.assertEqual(dice.parseMath("2*3-60*0.2"), -6)
+        self.assertEqual(dice.parseMath("2^3-6/-6"), 9)
+        self.assertEqual(dice.parseMath("20%15/5+2"), 3)
+
+    def test_rollDie(self):
+        for n in range(20):
+            self.assertTrue(1 <= dice.rollDie("1d20") <= 20)
+
+        for n in range(40):
+            self.assertTrue(2 <= dice.rollDie("2d20") <= 40)
+
+        self.assertEqual(dice.rollDie("1d1"), 1)
+        self.assertEqual(dice.rollDie("30d1"), 30)
 
 if __name__ == '__main__':
     # Main module
