@@ -13,6 +13,7 @@ from os import system, name
 # - How to deal with functions more complication than simple operators
 # - Possible simpler and seperate method or even seperate program entirely
 # add more shortcuts as needed
+# commas in large numbers
 # >>> testing <<<
 
 
