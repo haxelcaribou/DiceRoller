@@ -52,6 +52,10 @@ multRegex = re.compile(r"([\*/%])")
 addRegex = re.compile(r"(\+|(?<=\w) ?-)")
 mooRegex = re.compile(r"^mo{2,}$")
 funcRegex = re.compile(r"\w+$")
+topRegex = re.compile(r"(?<=t)\d+$")
+bottomRegex = re.compile(r"(?<=b)\d+$")
+diceNumberRegex = re.compile(r"^\d+(?=d)")
+diceSidesRegex = re.compile(r"(?<=d)\d+")
 
 
 # help text
@@ -337,13 +341,13 @@ def parseMath(input):
 def rollDie(input):
     print(ANSI.GREEN + input + ANSI.END)
 
-    numDice = int(re.search(r"^\d+(?=d)", input).group())
-    diceSides = int(re.search(r"(?<=d)\d+", input).group())
+    numDice = int(diceNumberRegex.search(input).group())
+    diceSides = int(diceSidesRegex.search(input).group())
     if numDice == 0 or diceSides == 0:
         return 0
 
-    tSearch = re.search(r"(?<=t)\d+$", input)
-    bSearch = re.search(r"(?<=b)\d+$", input)
+    tSearch = topRegex.search(input)
+    bSearch = bottomRegex.search(input)
     if tSearch:
         return removeDice(numDice, diceSides, int(tSearch.group()), True)
     elif bSearch:
