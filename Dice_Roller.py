@@ -446,8 +446,8 @@ def run():
     # keep taking commands
     while 1:
         # take input
-        i = input_string(ANSI.BLUE + "Enter Value: " +
-                         ANSI.END).strip().lower()
+        i = input(ANSI.BLUE + "Enter Value: " +
+                  ANSI.END).strip().lower()
 
         # help
         if i in ("help", "info"):
