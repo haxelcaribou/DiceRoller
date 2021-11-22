@@ -49,16 +49,16 @@ ans = 0
 
 # compile regexes
 DICE_REGEX = re.compile(r"^(\d+d\d+((t|b)\d+)?(?=( |$)))+")
-INT_REGEX = re.compile(r"^-? ?\d+$")
-FLOAT_REGEX = re.compile(r"^-? ?\d*\.\d+$")
-MULT_REGEX = re.compile(r"([\*/%])")
-ADD_REGEX = re.compile(r"(\+|(?<=\w) ?-)")
-MOO_REGEX = re.compile(r"^mo{2,}$")
-FUNC_REGEX = re.compile(r"\w+$")
-TOP_REGEX = re.compile(r"(?<=t)\d+$")
-BOTTOM_REGEX = re.compile(r"(?<=b)\d+$")
 DICE_NUMBER_REGEX = re.compile(r"^\d+(?=d)")
 DICE_SIDES_REGEX = re.compile(r"(?<=d)\d+")
+TOP_REGEX = re.compile(r"(?<=t)\d+$")
+BOTTOM_REGEX = re.compile(r"(?<=b)\d+$")
+INT_REGEX = re.compile(r"^-? ?\d+$")
+FLOAT_REGEX = re.compile(r"^-? ?\d*\.\d+$")
+ADD_REGEX = re.compile(r"(\+|(?<=\w) ?-)")
+MULT_REGEX = re.compile(r"([\*/%])")
+FUNC_REGEX = re.compile(r"\w+$")
+MOO_REGEX = re.compile(r"^mo{2,}$")
 
 
 # help text
